@@ -1,4 +1,5 @@
 use std::cmp::PartialEq;
+use std::str::Lines;
 
 fn contains_same_element<'element, T>(
     list1: &'element [T],
@@ -18,16 +19,19 @@ where
 
 fn char_to_prioritie(c: &u8) -> i32 {
     if *c >= b'a' {
-        println!("found {}: {}", *c as char, (c - b'a') as i32);
-        return (c - b'a') as i32 + 1;
+        let result = (c - b'a') as i32 + 1;
+        println!("found {}: {}", *c as char, result);
+        return result;
     }
-    println!("found {}: {}", *c as char, (c - b'A') as i32 + 27);
-    return (c - b'A') as i32 + 27;
+
+    let result = (c - b'A') as i32 + 27;
+    println!("found {}: {}", *c as char, result);
+    result
 }
 
-fn main() {
-    let ruckstack = include_str!("../input.txt").lines();
-    let result: i32 = ruckstack
+fn part_a(ruckstacks: &Lines) {
+    let result: i32 = ruckstacks
+        .clone()
         .map(|r| r.split_at(r.len() / 2))
         .map(|(r1, r2)| {
             println!("r1: {}, r2: {}", r1, r2);
@@ -38,5 +42,29 @@ fn main() {
         })
         .sum();
 
-    println!("Result sum: {}", result);
+    println!("Part A result sum: {}", result);
+}
+
+fn part_b(ruckstacks: &Lines) {
+    let ruckstacks = ruckstacks.clone();
+    let result: i32 = ruckstacks
+        .collect::<Vec<&str>>()
+        .chunks(3)
+        .map(|group| {
+            println!("group: {:?}", group);
+            let index = group[0].find(|c| group[1].contains(c) && group[2].contains(c));
+            return match index {
+                Some(index) => char_to_prioritie(&group[0].as_bytes()[index]),
+                None => 0,
+            };
+        })
+        .sum();
+    println!("Part B result sum: {}", result);
+}
+
+fn main() {
+    let ruckstacks = include_str!("../input.txt").lines();
+
+    part_a(&ruckstacks);
+    part_b(&ruckstacks);
 }
